@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bloom Filters Project</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+
+  <style>
+    :root {
+      --primary-color: #6c5ce7;
+      --secondary-color: #a29bfe;
+      --background-color: #ffffff;
+      --text-color: #2d3436;
+      --card-bg: #f5f6fa;
+      --success-color: #00b894;
+      --error-color: #d63031;
+      --warning-color: #fdcb6e;
+      --transition: all 0.3s ease;
+    }
+
+    .dark-mode {
+      --primary-color: #7c6cf7;
+      --secondary-color: #6c5ce7;
+      --background-color: #1e272e;
+      --text-color: #dfe6e9;
+      --card-bg: #2d3436;
+      --success-color: #00b894;
+      --error-color: #e17055;
+      --warning-color: #fdcb6e;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Roboto", 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--background-color);
+      color: var(--text-color);
+      transition: var(--transition);
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      max-width: 1200px;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: var(--text-color);
+      transition: var(--transition);
+      padding: 8px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .theme-toggle:hover {
+      background-color: var(--card-bg);
+    }
+
+    .blue-sun {
+      color: var(--primary-color);
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-grow: 1;
+      width: 100%;
+      max-width: 800px;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      text-align: center;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 40px;
+      text-align: center;
+      color: var(--text-color);
+      opacity: 0.8;
+    }
+
+    .search-container {
+      width: 100%;
+      max-width: 600px;
+      position: relative;
+      margin-bottom: 40px;
+    }
+
+    .search-bar {
+      width: calc(100% - 100px);
+      padding: 18px 20px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 4px 0 0 4px;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgb(131, 131, 131, 0.1);
+      transition: var(--transition);
+      outline: none;
+    }
+
+    .search-bar:focus {
+      border: 1px solid rgb(131, 131, 131, 0.8);
+    }
+
+    .search-btn {
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      position: absolute;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      height: 100%;
+      border-radius: 0 4px 4px 0;
+      width: 100px;
+      font-size: 1rem;
+      cursor: pointer;
+      /* transition: var(--transition); */
+    }
+
+    .search-btn:hover {
+      background-color: var(--secondary-color);
+      /* transform: translateY(-2px); */
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transform: translateX(150%);
+      transition: transform 0.4s ease;
+      z-index: 1000;
+      max-width: 350px;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification.success {
+      background-color: var(--success-color);
+    }
+
+    .notification.error {
+      background-color: var(--error-color);
+    }
+
+    .notification.warning {
+      background-color: var(--warning-color);
+      color: #2d3436;
+    }
+
+    .info-section {
+      background-color: var(--card-bg);
+      border-radius: 15px;
+      padding: 30px;
+      margin-top: 30px;
+      width: 100%;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-section h2 {
+      margin-bottom: 15px;
+      color: var(--primary-color);
+    }
+
+    .info-section p {
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      padding: 20px;
+      color: var(--text-color);
+      opacity: 0.7;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      .search-bar {
+        padding: 15px 20px;
+        font-size: 1rem;
+      }
+
+      .search-btn {
+        padding: 8px 20px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">BloomFilter</div>
+    <button class="theme-toggle" id="themeToggle">
+      <i class="fas fa-sun blue-sun" id="themeIcon"></i>
+    </button>
+  </header>
+
+  <div class="container">
+    <h1>Bloom Filters</h1>
+    <p class="subtitle">Probabilistic data structure for efficient membership testing</p>
+
+    <div class="search-container">
+      <input type="text" class="search-bar" id="searchInput" placeholder="Enter a value to check...">
+      <button class="search-btn" id="searchBtn">Check</button>
+    </div>
+
+    <div class="info-section">
+      <h2>About Bloom Filters</h2>
+      <p>A Bloom filter is a space-efficient probabilistic data structure that is used to test whether an element is a member of a set. False positive matches are possible, but false negatives are not.</p>
+      <p>This demonstration simulates a Bloom filter that might contain common words, names, or values. Try searching for different terms to see the results.</p>
+    </div>
+  </div>
+
+  <div class="notification" id="notification"></div>
+
+  <footer>
+    <p>Bloom Filters Project &copy; 2023</p>
+  </footer>
+
+  <script>
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const notification = document.getElementById('notification');
+
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      themeIcon.classList.toggle("fa-sun")
+      themeIcon.classList.toggle("fa-moon")
+      themeIcon.classList.toggle("blue-sun")
+    });
+
+    function showNotification(message, type) {
+      notification.textContent = message;
+      notification.className = `notification ${type} show`;
+
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 4000);
+    }
+
+
+    function checkIsValidInput(value) {
+      const regex = /^[a-z_][a-z0-9_]*$/;
+      return regex.test(value);
+    }
+
+    async function checkBloomFilter(value) {
+
+      if (!checkIsValidInput(value)) {
+        return showNotification("Username can only have lowercase letters, numbers, and _ , and cannot start with a number.", "warning");
+      }
+
+      searchBtn.disabled = true;
+      searchBtn.textContent = 'Checking...';
+
+      try {
+        const res = await fetch("/filter", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            username: value
+          })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          showNotification(data.message, "success")
+        } else {
+          showNotification(data.message, "error")
+        };
+        searchBtn.disabled = false;
+        searchBtn.textContent = 'Check';
+
+      } catch (err) {
+        console.log('Error', err);
+      }
+    }
+
+    searchBtn.addEventListener('click', () => {
+      const value = searchInput.value.trim();
+
+      if (value === '') {
+        showNotification('Please enter a value to check', 'warning');
+        return;
+      }
+      checkBloomFilter(value)
+    });
+
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchBtn.click();
+      }
+    });
+  </script>
+</body>
+
+</html>
